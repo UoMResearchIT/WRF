@@ -124,6 +124,7 @@ CONTAINS
 !-------------------------------------------------------------------------------
 
 SUBROUTINE advect_u   ( u, u_old, tendency,            &
+				h_tendency, v_tendency,		 &
                         ru, rv, rom,                   &
                         c1, c2,                        &
                         mut, time_step, config_flags,  &
@@ -153,6 +154,8 @@ SUBROUTINE advect_u   ( u, u_old, tendency,            &
 
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(IN   ) :: mut
    REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: tendency
+   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: h_tendency !T.Slater
+   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: v_tendency
 
    REAL , DIMENSION( ims:ime , jms:jme ) ,         INTENT(IN   ) :: msfux,  &
                                                                     msfuy,  &
@@ -1333,6 +1336,9 @@ SUBROUTINE advect_u   ( u, u_old, tendency,            &
 
    ENDIF
 
+!Pick up horizontal adevction before radiation bits added. Only horizontal advection possible as zeroed first.
+h_tendency=tendency !T. Slater
+
 !-------------------- vertical advection
 !  ADT eqn 44 has 3rd term on RHS = -(1/my) partial d/dz (rho u w)
 !  Here we have:  - partial d/dz (u*rom) = - partial d/dz (u rho w / my)
@@ -1523,11 +1529,16 @@ SUBROUTINE advect_u   ( u, u_old, tendency,            &
 
    ENDIF vert_order_test
 
+!Edit T. Slater 20120830
+!Get vertical advection of u
+v_tendency=tendency - h_tendency
+
 END SUBROUTINE advect_u
 
 !-------------------------------------------------------------------------------
 
 SUBROUTINE advect_v   ( v, v_old, tendency,            &
+				h_tendency, v_tendency,		 &
                         ru, rv, rom,                   &
                         c1, c2,                        &
                         mut, time_step, config_flags,  &
@@ -1557,6 +1568,8 @@ SUBROUTINE advect_v   ( v, v_old, tendency,            &
 
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(IN   ) :: mut
    REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: tendency
+   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: h_tendency !T. Slater
+   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: v_tendency
 
    REAL , DIMENSION( ims:ime , jms:jme ) ,         INTENT(IN   ) :: msfux,  &
                                                                     msfuy,  &
@@ -2810,6 +2823,9 @@ SUBROUTINE advect_v   ( v, v_old, tendency,            &
 
    ENDIF
 
+!T. Slate edit. Get horizontal advection on own.
+h_tendency=tendency
+
 !-------------------- vertical advection
 !     ADT eqn 45 has 3rd term on RHS = -(1/mx) partial d/dz (rho v w)
 !     Here we have: - partial d/dz (v*rom) = - partial d/dz (v rho w / my)
@@ -3020,6 +3036,9 @@ SUBROUTINE advect_v   ( v, v_old, tendency,            &
       CALL wrf_error_fatal ( TRIM( wrf_err_message ) )
 
    ENDIF vert_order_test
+
+!T. Slater Edit 2012, get vertical advection
+v_tendency = tendency - h_tendency
 
 END SUBROUTINE advect_v
 
@@ -4362,6 +4381,7 @@ END SUBROUTINE advect_scalar
 !---------------------------------------------------------------------------------
 
 SUBROUTINE advect_w    ( w, w_old, tendency,            &
+				 h_tendency, v_tendency,	  &
                          ru, rv, rom,                   &
                          c1, c2,                        &
                          mut, time_step, config_flags,  &
@@ -4391,6 +4411,8 @@ SUBROUTINE advect_w    ( w, w_old, tendency,            &
 
    REAL , DIMENSION( ims:ime , jms:jme ) , INTENT(IN   ) :: mut
    REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: tendency
+   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: h_tendency !T. Slater 2012
+   REAL , DIMENSION( ims:ime , kms:kme , jms:jme ) , INTENT(INOUT) :: v_tendency
 
    REAL , DIMENSION( ims:ime , jms:jme ) ,         INTENT(IN   ) :: msfux,  &
                                                                     msfuy,  &
@@ -5845,6 +5867,9 @@ ELSE IF (horz_order == 2 ) THEN
 
    ENDIF
 
+!T. Slater edit 2012, to get horizontal advection on its one savvy 
+h_tendency=tendency
+
 !-------------------- vertical advection
 !     ADT eqn 46 has 3rd term on RHS (dividing through by my) = - partial d/dz (w rho w /my)
 !     Here we have:  - partial d/dz (w*rom) = - partial d/dz (w rho w / my)
@@ -6061,13 +6086,15 @@ ELSE IF (horz_order == 2 ) THEN
 
    ENDIF vert_order_test
 
+v_tendency = tendency - h_tendency !T. Slater
+
 END SUBROUTINE advect_w
 
 !----------------------------------------------------------------
 
 #endif
 SUBROUTINE advect_scalar_pd   ( field, field_old, tendency,    &
-                                h_tendency, z_tendency,        &
+                                h_tendency, z_tendency,        & 
                                 ru, rv, rom,                   &
                                 c1, c2,                        &
                                 mut, mub, mu_old,              &
