@@ -41,3 +41,34 @@ package   restofwrf      use_wps_input==0            -             -
 package   realonly       use_wps_input==1            -            state:u_gc,v_gc,t_gc,rh_gc,ght_gc,p_gc,xlat_gc,xlong_gc,ht_gc,tsk_gc,tavgsfc,tmn_gc,pslv_gc,sct_dom_gc,scb_dom_gc,greenfrac,albedo12m,lai12m,pd_gc,psfc_gc,intq_gc,pdhs,sh_gc,cl_gc,cf_gc,qv_gc,qr_gc,qc_gc,qs_gc,qi_gc,qg_gc,qh_gc,qni_gc,qnc_gc,icefrac_gc,prho_gc,pdrho_gc,qnr_gc,qns_gc,qng_gc,qnh_gc,soil_layers,soil_levels,st,sm,sw,soilt,soilm,sm000007,sm007028,sm028100,sm100255,st000007,st007028,st028100,st100255,sm000010,sm010040,sm040100,sm100200,sm010200,soilm000,soilm005,soilm020,soilm040,soilm160,soilm300,sw000010,sw010040,sw040100,sw100200,sw010200,soilw000,soilw005,soilw020,soilw040,soilw160,soilw300,st000010,st010040,st040100,st100200,st010200,soilt000,soilt005,soilt020,soilt040,soilt160,soilt300,fad0_urb2d,fad135_urb2d,fad45_urb2d,pad_urb2d,fad90_urb2d,rad_urb2d,car_urb2d,h2w_urb2d,svf_urb2d,z0s_urb2d,z0r_urb2d,z0m_urb2d,zds_urb2d,zdm_urb2d,zdr_urb2d,qnwfa_gc,qnwfa_now,qnwfa_jan,qnwfa_feb,qnwfa_mar,qnwfa_apr,qnwfa_may,qnwfa_jun,qnwfa_jul,qnwfa_aug,qnwfa_sep,qnwfa_oct,qnwfa_nov,qnwfa_dec,qnifa_gc,qnifa_now,qnifa_jan,qnifa_feb,qnifa_mar,qnifa_apr,qnifa_may,qnifa_jun,qnifa_jul,qnifa_aug,qnifa_sep,qnifa_oct,qnifa_nov,qnifa_dec,qntemp,qntemp2,hgtmaxw,pmaxw,tmaxw,umaxw,vmaxw,hgttrop,ptrop,ttrop,utrop,vtrop,urb_param
 
 package   tconly         use_wps_input==2            -             state:u_gc,v_gc,t_gc,rh_gc,ght_gc,p_gc,xlat_gc,xlong_gc,ht_gc,tsk_gc,tavgsfc,tmn_gc,pslv_gc,sct_dom_gc,scb_dom_gc,greenfrac,albedo12m,pd_gc,psfc_gc,intq_gc,pdhs,sh_gc,qv_gc,qr_gc,qc_gc,qs_gc,qi_gc,qg_gc,qh_gc,qni_gc,qnc_gc,qnr_gc,qns_gc,qng_gc,qnh_gc,icefrac_gc
+
+#Momentum terms, T.Slater
+state  real   ru_tend_hadv  ikj    dyn_em		1	X		irh "ru_tend_hadv" "Horizontal advection of zonal coupled momentum term" "Pa m s-2"
+state  real   ru_tend_vadv  ikj    dyn_em		1	X		irh "ru_tend_vadv" "Vertical advection of zonal coupled momentum term" "Pa m s-2"
+state  real   ru_tend_pgf  ikj    dyn_em		1 	X		irh "ru_tend_pgf" "PGF zonal coupled momentum term" "Pa m s-2"
+state  real   ru_tend_cor  ikj    dyn_em		1 	X		irh "ru_tend_cor" "Coriolis zonal coupled momentum term" "Pa m s-2"
+state  real   ru_tend_curv ikj    dyn_em       		 1     X		irh "ru_tend_curv" "Curvature zonal coupled momentum term" "Pa m s-2"
+state  real   rv_tend_hadv  ikj    dyn_em		1	Y		irh "rv_tend_hadv" "Horizontal advection of y coupled momentum term" "Pa m s-2"
+state  real   rv_tend_vadv  ikj    dyn_em		1	Y		irh "rv_tend_vadv" "Vertical advection of y coupled momentum term" "Pa m s-2"
+state  real   rv_tend_pgf  ikj    dyn_em		1 	Y		irh "rv_tend_pgf" "PGF y coupled momentum term" "Pa m s-2"
+state  real   rv_tend_cor  ikj    dyn_em		1 	Y		irh "rv_tend_cor" "Coriolis y coupled momentum term" "Pa m s-2" 
+state  real   rv_tend_curv ikj    dyn_em 	       1     Y		irh "rv_tend_curv" "Curvature y coupled momentum term" "Pa ms-2"
+state  real   rw_tend_hadv  ikj    dyn_em		1	Z		ir "rw_tend_hadv" "Horizontal advection of vertical coupled momentum term" "Pa m s-2"
+state  real   rw_tend_vadv  ikj    dyn_em		1	Z		ir "rw_tend_vadv" "Vertical advection of vertical coupled momentum term" "Pa m s-2"
+state  real   rw_tend_pgf  ikj    dyn_em		1 	Z		ir "rw_tend_pgf" "PGF vertical coupled momentum term" "Pa m s-2"
+state  real   rw_tend_buoy  ikj    dyn_em		1 	Z		ir "rw_tend_buoy" "thermal bouyancy coupled vertical momentum term" "Pa m s-2"
+state  real   rw_tend_damp  ikj    dyn_em		1 	Z		ir "rw_tend_damp" "Damping vertical coupled momentum term" "Pa m s-2"
+state  real   rw_tend_cor ikj    dyn_em        1      Z		ir "rw_tend_cor" "Coriolis z coupled momentum term" "Pa ms-2"
+state  real   rw_tend_curv ikj    dyn_em        1     Z		ir "rw_tend_curv" "Curvature z coupled momentum term" "Pa ms-2"
+
+
+#Momentum physics terms, T. Slater
+state  real   ru_tendf_pbl ikj    dyn_em		1 	X		irh "ru_tendf_pbl" "PBL x coupled momentum term" "Pa m s-2"
+state  real   rv_tendf_pbl ikj    dyn_em         1     Y		irh "rv_tendf_pbl" "PBL y coupled momentum term" "Pa ms-2"
+state  real   ru_tendf_cu ikj    dyn_em		1 	X		ir "ru_tendf_cu" "Microphysics x coupled momentum term" "Pa m s-2"
+state  real   rv_tendf_cu ikj    dyn_em          1     Y		ir "rv_tendf_cu" "Microphysics y coupled momentum term" "Pa ms-2"
+state  real   ru_tendf_diff ikj    dyn_em		1 	X		irh "ru_tendf_diff" "Diffusion x coupled momentum term" "Pa m s-2"
+state  real   rv_tendf_diff ikj    dyn_em        1     Y		irh "rv_tendf_diff" "Diffusion y coupled momentum term" "Pa ms-2"
+state  real   rw_tendf_diff ikj    dyn_em        1     Z		ir "rw_tendf_diff" "Diffusion z coupled momentum term" "Pa ms-2"
+state  real   mu_tend2 ij    dyn_em        1     -		irh "mu_tend2" "Mass tendency" "Pa s-1"
+

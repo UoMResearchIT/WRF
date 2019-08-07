@@ -2397,7 +2397,9 @@ END SUBROUTINE horizontal_pressure_gradient
 
 !-------------------------------------------------------------------------------
 
-SUBROUTINE pg_buoy_w( rw_tend, p, cqw, muf, mubf,     &
+SUBROUTINE pg_buoy_w( rw_tend, rw_tend_pgf, rw_tend_buoy,&
+			    rw_tend_hadv, rw_tend_vadv,	&
+			    p, cqw, muf, mubf,     &
                       c1f, c2f,                       &
                       rdnw, rdn, g, msftx, msfty,     &
                       ids, ide, jds, jde, kds, kde,   &
@@ -2417,6 +2419,10 @@ SUBROUTINE pg_buoy_w( rw_tend, p, cqw, muf, mubf,     &
 
 
    REAL, DIMENSION( ims:ime, kms:kme , jms:jme ), INTENT(INOUT) ::  rw_tend
+   REAL, DIMENSION( ims:ime, kms:kme , jms:jme ), INTENT(INOUT) ::  rw_tend_pgf
+   REAL, DIMENSION( ims:ime, kms:kme , jms:jme ), INTENT(INOUT) ::  rw_tend_buoy
+   REAL, DIMENSION( ims:ime, kms:kme , jms:jme ), INTENT(INOUT) ::  rw_tend_hadv
+   REAL, DIMENSION( ims:ime, kms:kme , jms:jme ), INTENT(INOUT) ::  rw_tend_vadv
 
    REAL, DIMENSION( ims:ime, jms:jme ), INTENT(IN   ) :: mubf, muf, msftx, msfty
 
@@ -2461,6 +2467,14 @@ SUBROUTINE pg_buoy_w( rw_tend, p, cqw, muf, mubf,     &
        rw_tend(i,k,j) = rw_tend(i,k,j)+(1./msfty(i,j))*g*(      &
                         cq1*2.*rdnw(k-1)*(  -p(i,k-1,j))  &
                         -(c1f(k)*muf(i,j))-cq2*(c1f(k)*mubf(i,j)+c2f(k))            )
+
+!T. Slater New Edit to get separate pgf and buoy terms 
+       rw_tend_pgf(i,k,j) = (1./msfty(i,j))*g*(      &
+                        cq1*2.*rdnw(k-1)*(  -p(i,k-1,j))  &
+                                    )
+
+	 rw_tend_buoy(i,k,j) = (1./msfty(i,j))*g*( -mu(i,j)-cq2*mubf(i,j)  )
+!End T. Slater
      END DO
 
      DO k = 2, kde-1
@@ -2471,6 +2485,13 @@ SUBROUTINE pg_buoy_w( rw_tend, p, cqw, muf, mubf,     &
       rw_tend(i,k,j) = rw_tend(i,k,j)+(1./msfty(i,j))*g*(      &
                        cq1*rdn(k)*(p(i,k,j)-p(i,k-1,j))  &
                        -(c1f(k)*muf(i,j))-cq2*(c1f(k)*mubf(i,j)+c2f(k))            )
+!T. Slater
+      rw_tend_pgf(i,k,j) = (1./msfty(i,j))*g*(      &
+                       cq1*rdn(k)*(p(i,k,j)-p(i,k-1,j))  &
+                                  )
+
+      rw_tend_buoy(i,k,j) = (1./msfty(i,j))*g*(  -mu(i,j)-cq2*mubf(i,j)   )
+!End T. Slater
      END DO
      ENDDO           
 

@@ -212,7 +212,17 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                          ids, ide, jds, jde, kds, kde,                    &
                          ims, ime, jms, jme, kms, kme,                    &
                          its, ite, jts, jte, kts, kte,                    &
-                         max_vert_cfl, max_horiz_cfl)
+                         max_vert_cfl, max_horiz_cfl,				  &
+				 ru_tend_hadv, ru_tend_vadv, ru_tend_pgf,		  &
+				 ru_tend_cor, ru_tend_curv,				  &
+				 rv_tend_hadv, rv_tend_vadv, rv_tend_pgf,		  &
+				 rv_tend_cor, rv_tend_curv,				  &
+				 rw_tend_hadv, rw_tend_vadv,				  &
+				 rw_tend_pgf, rw_tend_buoy,				  &
+				 rw_tend_damp, rw_tend_cor, rw_tend_curv,		  &
+				 ru_tendf_diff, rv_tendf_diff, rw_tendf_diff,	  &
+				 ru_tendf_pbl, rv_tendf_pbl,				  &
+				 ru_tendf_cu, rv_tendf_cu, mu_tend2			 	) !t. Slater 06/2014
 
    IMPLICIT NONE
 
@@ -276,9 +286,45 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                                                          t_tendf,  &
                                                          ph_tendf, &
                                                          cqw
+!T. Slater Edit 23/07/2012 (Horizontal momentum terms)	
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) ,                   &
+                                        INTENT(INOUT) :: ru_tend_hadv, &
+									   ru_tend_vadv, &
+									   ru_tend_pgf,  &
+									   ru_tend_cor,  &
+									   ru_tend_curv, &
+									   rv_tend_hadv, &
+									   rv_tend_vadv, &
+									   rv_tend_pgf,  &
+									   rv_tend_cor,  &
+									   rv_tend_curv
+	
+!T. Slater Edit 29/08/2012 (Vertical momentum terms)	
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) ,                   &
+                                        INTENT(INOUT) :: rw_tend_hadv, &
+									   rw_tend_vadv, &
+									   rw_tend_pgf,  &
+									   rw_tend_buoy, &
+									   rw_tend_cor,  &
+									   rw_tend_damp, &
+									   rw_tend_curv
 
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) ,			    &
+						    INTENT(INOUT) :: ru_tendf_pbl, &
+                                                         rv_tendf_pbl !T. Slater
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) , 			    &
+						    INTENT(INOUT) :: ru_tendf_cu,  &
+                                                         rv_tendf_cu !T.Slater
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) ,			     &
+						    INTENT(INOUT) :: ru_tendf_diff, &
+	                                                   rv_tendf_diff, &
+                                                         rw_tendf_diff !T. Slater
+
+	
    REAL , DIMENSION( ims:ime , jms:jme ) ,         INTENT(  OUT) :: mu_tend, &
                                                                     mu_save
+
+   REAL , DIMENSION( ims:ime , jms:jme ) ,         INTENT(INOUT) :: mu_tend2 !T. Slater 06/2014
 
    REAL , DIMENSION( ims:ime , jms:jme ) ,         INTENT(IN   ) :: msfux,   &
                                                                     msfuy,   &
@@ -369,6 +415,83 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                     ims, ime, jms, jme, kms, kme, &
                     its, ite, jts, jte, kts, kte )
 
+!T. Slater 2012. Zero other tendencies
+
+   CALL zero_tend ( ru_tend_hadv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( ru_tend_vadv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( ru_tend_pgf,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( ru_tend_cor,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( ru_tend_curv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rv_tend_hadv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rv_tend_vadv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rv_tend_pgf,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rv_tend_cor,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rv_tend_curv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+
+   CALL zero_tend ( rw_tend_hadv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rw_tend_vadv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rw_tend_damp,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+
+   CALL zero_tend ( rw_tend_buoy,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+
+   CALL zero_tend ( rw_tend_pgf,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rw_tend_cor,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+   CALL zero_tend ( rw_tend_curv,                      &
+                    ids, ide, jds, jde, kds, kde, &
+                    ims, ime, jms, jme, kms, kme, &
+                    its, ite, jts, jte, kts, kte )
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    CALL zero_tend ( t_tend,                       &
                     ids, ide, jds, jde, kds, kde, &
                     ims, ime, jms, jme, kms, kme, &
@@ -409,6 +532,11 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                     ims, ime, jms, jme, 1, 1, &
                     its, ite, jts, jte, 1, 1 )
 
+   CALL zero_tend2d( mu_tend2,                  &
+                    ids, ide, jds, jde, 1, 1, &
+                    ims, ime, jms, jme, 1, 1, &
+                    its, ite, jts, jte, 1, 1 ) !T. Slater 06/2014
+
    CALL zero_tend2d( mu_save,                  &
                     ids, ide, jds, jde, 1, 1, &
                     ims, ime, jms, jme, 1, 1, &
@@ -432,7 +560,8 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
 
      ELSE
      
-     CALL advect_u ( u, u , ru_tend, ru, rv, ww, &
+     CALL advect_u ( u, u , ru_tend, ru_tend_hadv,&
+			 ru_tend_vadv, ru, rv, ww, 	 &
                    c1h, c2h,                     &
                    mut, time_step, config_flags, &
                    msfux, msfuy, msfvx, msfvy,   &
@@ -457,8 +586,9 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
 
     ELSE
      
-     CALL advect_v ( v, v , rv_tend, ru, rv, ww,  &
-                   c1h, c2h,                     &
+     CALL advect_v ( v, v , rv_tend, rv_tend_hadv,&
+			 rv_tend_vadv, ru, rv, ww,	  &
+                  c1h, c2h,                     &
                    mut, time_step, config_flags, &
                    msfux, msfuy, msfvx, msfvy,   &
                    msftx, msfty,                 &
@@ -483,7 +613,8 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
 
      ELSE
      
-     CALL advect_w ( w, w, rw_tend, ru, rv, ww,    &
+     CALL advect_w ( w, w, rw_tend, rw_tend_hadv,  &
+			   rw_tend_vadv, ru, rv, ww,     &
                      c1h, c2h,                     &
                      mut, time_step, config_flags, &
                      msfux, msfuy, msfvx, msfvy,   &
@@ -567,9 +698,14 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                                          ids, ide, jds, jde, kds, kde,   &
                                          ims, ime, jms, jme, kms, kme,   &
                                          its, ite, jts, jte, kts, kte   )
+	!T.Slater Edit Horizontal Momentum 23/07/2012
+	ru_tend_pgf=ru_tend - ru_tend_hadv - ru_tend_vadv
+	rv_tend_pgf=rv_tend - rv_tend_hadv - rv_tend_vadv
 
      IF (non_hydrostatic) THEN
-          CALL pg_buoy_w( rw_tend, p, cqw, mu, mub,       &
+          CALL pg_buoy_w( rw_tend,rw_tend_pgf, rw_tend_buoy,&
+				  rw_tend_hadv, rw_tend_vadv, 	&
+				 p, cqw, mu, mub,       &
                           c1f,c2f,                        &
                           rdnw, rdn, g, msftx, msfty,     &
                           ids, ide, jds, jde, kds, kde,   &
@@ -585,6 +721,8 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                       ids, ide, jds, jde, kds, kde,     &
                       ims, ime, jms, jme, kms, kme,     &
                       its, ite, jts, jte, kts, kte     )
+	!T.Slater Vertical Momentum 28/08/2012
+	rw_tend_damp=rw_tend - rw_tend_hadv - rw_tend_vadv - rw_tend_pgf - rw_tend_buoy
 
      IF(config_flags%pert_coriolis) THEN
 
@@ -609,6 +747,11 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                           ids, ide, jds, jde, kds, kde, &
                           ims, ime, jms, jme, kms, kme, &
                           its, ite, jts, jte, kts, kte )
+	!T.Slater Edit Horizontal Momentum 23/07/2012
+	ru_tend_cor=ru_tend - ru_tend_hadv - ru_tend_vadv - ru_tend_pgf
+	rv_tend_cor=rv_tend - rv_tend_hadv - rv_tend_vadv - rv_tend_pgf
+	!T.Slater Vertical Momentum 28/08/2012
+	rw_tend_cor=rw_tend - rw_tend_hadv - rw_tend_vadv - rw_tend_pgf - rw_tend_buoy - rw_tend_damp
 
      END IF
 
@@ -621,6 +764,10 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                        ids, ide, jds, jde, kds, kde,   &
                        ims, ime, jms, jme, kms, kme,   &
                        its, ite, jts, jte, kts, kte   )
+	ru_tend_curv=ru_tend - ru_tend_hadv - ru_tend_vadv - ru_tend_pgf - ru_tend_cor
+	rv_tend_curv=rv_tend - rv_tend_hadv - rv_tend_vadv - rv_tend_pgf - rv_tend_cor
+	!T.Slater Vertical Momentum 28/08/2012
+	rw_tend_curv=rw_tend - rw_tend_hadv - rw_tend_vadv  - rw_tend_pgf - rw_tend_buoy - rw_tend_damp -rw_tend_cor
 
 ! Damping option added for Held-Suarez test (also uses lw option HELDSUAREZ)
       IF (config_flags%ra_lw_physics == HELDSUAREZ) THEN
@@ -713,6 +860,11 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                                          its, ite, jts, jte, kts, kte         )
 
         ENDIF pbl_test
+!T. Slater Diffusion Momentum terms, Physics driver terms have been calculated by this point.
+ru_tendf_diff = ru_tendf - ru_tendf_pbl - ru_tendf_cu
+rv_tendf_diff = rv_tendf - rv_tendf_pbl - rv_tendf_cu
+rw_tendf_diff = rw_tendf !Assumes no upper damping and no diffusion from physics terms.
+
 
    !  Theta tendency computations.
 
@@ -806,7 +958,10 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,      &
                             ids,ide, jds,jde, kds,kde,                       &
                             ims,ime, jms,jme, kms,kme,                       &
                             ips,ipe, jps,jpe, kps,kpe,                       &
-                            its,ite, jts,jte, kts,kte                       )
+                            its,ite, jts,jte, kts,kte,			     &
+				    ru_tendf_pbl, rv_tendf_pbl,			     & !T. Slater
+				    ru_tendf_cu, rv_tendf_cu,				     & !T. Slater
+				    ru_tendf_diff, rv_tendf_diff, rw_tendf_diff, mu_tend2  ) !Physics tendency output terms. T. Slater 29/08/2012
 
    IMPLICIT NONE
 
@@ -829,8 +984,17 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,      &
                                                                       ph_tendf, &
                                                                       t_tendf
 
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) , INTENT(INOUT) :: ru_tendf_pbl, &
+                                                                      rv_tendf_pbl !T. Slater
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) , INTENT(INOUT) :: ru_tendf_cu, &
+                                                                      rv_tendf_cu !T.Slater
+   REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) , INTENT(INOUT) :: ru_tendf_diff, &
+                                                                      rv_tendf_diff, &
+                                                                      rw_tendf_diff !T. Slater
+
    REAL , DIMENSION( ims:ime , jms:jme  ) , INTENT(INOUT) :: mu_tend, &
-                                                             mu_tendf
+                                                             mu_tendf, &
+								mu_tend2 !T.Slater 06/2014
 
    REAL , DIMENSION( ims:ime , kms:kme, jms:jme  ) , INTENT(IN   ) ::  u_save,  &
                                                                        v_save,  &
@@ -852,6 +1016,7 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,      &
 
 ! Local
    INTEGER :: i, j, k
+   REAL :: temp_var
 
 !<DESCRIPTION>
 !
@@ -882,6 +1047,15 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,      &
      IF(rk_step == 1)ru_tendf(i,k,j) = ru_tendf(i,k,j) +  u_save(i,k,j)*msfuy(i,j)
      ! divide by my to couple u
      ru_tend(i,k,j) = ru_tend(i,k,j) + ru_tendf(i,k,j)/msfuy(i,j)
+
+     temp_var = ru_tendf_diff(i,k,j)/msfuy(i,j) !T. Slater
+     ru_tendf_diff(i,k,j) = temp_var  		!T. Slater
+
+     temp_var = ru_tendf_pbl(i,k,j)/msfuy(i,j)  !T. Slater
+     ru_tendf_pbl(i,k,j) = temp_var  		!T. Slater
+
+     temp_var = ru_tendf_cu(i,k,j)/msfuy(i,j)   !T. Slater
+     ru_tendf_cu(i,k,j) = temp_var  		!T. Slater
    ENDDO
    ENDDO
    ENDDO
@@ -893,6 +1067,15 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,      &
      IF(rk_step == 1)rv_tendf(i,k,j) = rv_tendf(i,k,j) +  v_save(i,k,j)*msfvx(i,j)
      ! divide by mx to couple v
      rv_tend(i,k,j) = rv_tend(i,k,j) + rv_tendf(i,k,j)*msfvx_inv(i,j)
+
+     temp_var = rv_tendf_diff(i,k,j)*msfvx_inv(i,j) !T. Slater
+     rv_tendf_diff(i,k,j) = temp_var  		!T. Slater
+
+     temp_var = rv_tendf_pbl(i,k,j)*msfvx_inv(i,j)  !T. Slater
+     rv_tendf_pbl(i,k,j) = temp_var  		!T. Slater
+
+     temp_var = rv_tendf_cu(i,k,j)*msfvx_inv(i,j)   !T. Slater
+     rv_tendf_cu(i,k,j) = temp_var  		!T. Slater
    ENDDO
    ENDDO
    ENDDO
@@ -904,6 +1087,10 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,      &
      IF(rk_step == 1)rw_tendf(i,k,j) = rw_tendf(i,k,j) +  w_save(i,k,j)*msfty(i,j)
      ! divide by my to couple w
      rw_tend(i,k,j) = rw_tend(i,k,j) + rw_tendf(i,k,j)/msfty(i,j)
+
+     temp_var = rw_tendf_diff(i,k,j)/msfty(i,j) !T. Slater
+     rw_tendf_diff(i,k,j) = temp_var		!T. Slater
+
      IF(rk_step == 1)ph_tendf(i,k,j) = ph_tendf(i,k,j) +  ph_save(i,k,j)
      ! divide by my to couple scalar
      ph_tend(i,k,j) = ph_tend(i,k,j) + ph_tendf(i,k,j)/msfty(i,j)
@@ -927,6 +1114,7 @@ SUBROUTINE rk_addtend_dry ( ru_tend, rv_tend, rw_tend, ph_tend, t_tend,      &
    DO i = its,MIN(ite,ide-1)
 ! mu tendencies not coupled with 1/msf
       MU_TEND(i,j) =  MU_TEND(i,j) +  MU_TENDF(i,j)
+      mu_tend2(i,j)=mu_tend(i,j) !T. Slater 06/2014
    ENDDO
    ENDDO
 

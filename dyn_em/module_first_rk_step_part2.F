@@ -32,6 +32,8 @@ CONTAINS
                              , imsy,imey,jmsy,jmey,kmsy,kmey    &
                              , ipsy,ipey,jpsy,jpey,kpsy,kpey    &
                              , k_start , k_end                  &
+				     , ru_tendf_pbl, rv_tendf_pbl  & !T. Slater
+				     , ru_tendf_cu, rv_tendf_cu	   & !T. Slater
                             )
     USE module_state_description
     USE module_model_constants
@@ -111,6 +113,11 @@ CONTAINS
     REAL    ,DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: ph_tendf
     REAL    ,DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: t_tendf
     REAL    ,DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: tke_tend
+
+    REAL    ,DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: ru_tendf_pbl !T. Slater
+    REAL    ,DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: rv_tendf_pbl !T. Slater
+    REAL    ,DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: ru_tendf_cu !T. Slater
+    REAL    ,DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(INOUT) :: rv_tendf_cu !T. Slater
 
     REAL    ,DIMENSION(ims:ime,jms:jme), INTENT(INOUT) :: mu_tendf
 
@@ -701,7 +708,9 @@ BENCH_START(update_phy_ten_tim)
                            ims, ime, jms, jme, kms, kme,                    &
                            grid%i_start(ij), grid%i_end(ij),                &
                            grid%j_start(ij), grid%j_end(ij),                &
-                           k_start, k_end                               )
+                           k_start, k_end ,                                 &
+				   grid%ru_tendf_pbl, grid%rv_tendf_pbl,		    & !T. Slater
+				   grid%ru_tendf_cu, grid%rv_tendf_cu		    ) !T. Slater
 
        END DO
        !$OMP END PARALLEL DO

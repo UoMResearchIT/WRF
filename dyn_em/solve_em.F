@@ -787,6 +787,8 @@ BENCH_START(calc_p_rho_tim)
                              , imsy, imey, jmsy, jmey, kmsy, kmey    &
                              , ipsy, ipey, jpsy, jpey, kpsy, kpey    &
                              , k_start , k_end                  &
+				     , grid%ru_tendf_pbl, grid%rv_tendf_pbl  &
+				     , grid%ru_tendf_cu, grid%rv_tendf_cu	   &
                             )
 
      END IF rk_step_is_one
@@ -825,7 +827,16 @@ BENCH_START(rk_tend_tim)
                          ,grid%i_start(ij), grid%i_end(ij)                                                     &
                          ,grid%j_start(ij), grid%j_end(ij)                                                     &
                          ,k_start, k_end                                                                       &
-                         ,max_vert_cfl_tmp(ij), max_horiz_cfl_tmp(ij)                                         )
+                         ,max_vert_cfl_tmp(ij), max_horiz_cfl_tmp(ij)         				       &                         
+				 ,grid%ru_tend_hadv, grid%ru_tend_vadv, grid%ru_tend_pgf, grid%ru_tend_cor		   &
+				 ,grid%ru_tend_curv		   									   &
+				 ,grid%rv_tend_hadv, grid%rv_tend_vadv, grid%rv_tend_pgf, grid%rv_tend_cor		   &
+				 ,grid%rv_tend_curv									 		   &
+				 ,grid%rw_tend_hadv, grid%rw_tend_vadv, grid%rw_tend_pgf, grid%rw_tend_buoy		   &
+				 ,grid%rw_tend_damp, grid%rw_tend_cor ,grid%rw_tend_curv					   &
+				 ,grid%ru_tendf_diff, grid%rv_tendf_diff, grid%rw_tendf_diff				   &
+				 ,grid%ru_tendf_pbl, grid%rv_tendf_pbl, grid%ru_tendf_cu, grid%rv_tendf_cu		   &
+				 ,grid%mu_tend2) !T. Slater 2014
      END DO
      !$OMP END PARALLEL DO
 BENCH_END(rk_tend_tim)
@@ -882,7 +893,7 @@ BENCH_START(relax_bdy_dry_tim)
                               k_start, k_end                              )
 
        ENDIF
-
+!grid%_tend_phys added bby T. Slater 28/08/2012 - physics tendencies.
        CALL rk_addtend_dry( grid%ru_tend,  grid%rv_tend,  rw_tend,  ph_tend,  t_tend,  &
                             ru_tendf, rv_tendf, rw_tendf, ph_tendf, t_tendf, &
                             grid%u_save, grid%v_save, w_save, ph_save, grid%t_save, &
@@ -896,7 +907,11 @@ BENCH_START(relax_bdy_dry_tim)
                             ips,ipe, jps,jpe, kps,kpe,                       &
                             grid%i_start(ij), grid%i_end(ij),                &
                             grid%j_start(ij), grid%j_end(ij),                &
-                            k_start, k_end                                  )
+                            k_start, k_end,					     &
+				    grid%ru_tendf_pbl, grid%rv_tendf_pbl,		     &
+				    grid%ru_tendf_cu, grid%rv_tendf_cu,		     &
+				    grid%ru_tendf_diff, grid%rv_tendf_diff, grid%rw_tendf_diff, &
+			   grid%mu_tend2) !t.slater 06/2014
 
        IF( config_flags%specified .or. config_flags%nested ) THEN 
          CALL spec_bdy_dry ( config_flags,                                    &
