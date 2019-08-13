@@ -2473,7 +2473,7 @@ SUBROUTINE pg_buoy_w( rw_tend, rw_tend_pgf, rw_tend_buoy,&
                         cq1*2.*rdnw(k-1)*(  -p(i,k-1,j))  &
                                     )
 
-	 rw_tend_buoy(i,k,j) = (1./msfty(i,j))*g*( -mu(i,j)-cq2*mubf(i,j)  )
+	 rw_tend_buoy(i,k,j) = (1./msfty(i,j))*g*( -(c1f(k)*muf(i,j))-cq2*(c1f(k)*mubf(i,j)+c2f(k))  )
 !End T. Slater
      END DO
 
@@ -2490,7 +2490,7 @@ SUBROUTINE pg_buoy_w( rw_tend, rw_tend_pgf, rw_tend_buoy,&
                        cq1*rdn(k)*(p(i,k,j)-p(i,k-1,j))  &
                                   )
 
-      rw_tend_buoy(i,k,j) = (1./msfty(i,j))*g*(  -mu(i,j)-cq2*mubf(i,j)   )
+      rw_tend_buoy(i,k,j) = (1./msfty(i,j))*g*(  -(c1f(k)*muf(i,j))-cq2*(c1f(k)*mubf(i,j)+c2f(k))   )
 !End T. Slater
      END DO
      ENDDO           

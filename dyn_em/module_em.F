@@ -712,6 +712,7 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
                           ims, ime, jms, jme, kms, kme,   &
                           its, ite, jts, jte, kts, kte   )
      ENDIF
+	rw_tend_buoy=rw_tend - rw_tend_hadv - rw_tend_vadv - rw_tend_pgf
 
      CALL w_damp   ( rw_tend, max_vert_cfl,             &
                       max_horiz_cfl,                    &
