@@ -862,13 +862,16 @@ SUBROUTINE rk_tendency ( config_flags, rk_step,                           &
 	rv_tend_pgf=rv_tend - rv_tend_hadv - rv_tend_vadv
 
    IF (non_hydrostatic) THEN
-        CALL pg_buoy_w( rw_tend, p, cqw, mu, mub,       &
+        CALL pg_buoy_w( rw_tend, rw_tend_pgf, rw_tend_buoy, &
+				   rw_tend_hadv, rw_tend_vadv,   &
+				   p, cqw, mu, mub,       &
                         c1f,c2f,                        &
                         rdnw, rdn, g, msftx, msfty,     &
                         ids, ide, jds, jde, kds, kde,   &
                         ims, ime, jms, jme, kms, kme,   &
                         its, ite, jts, jte, kts, kte   )
    ENDIF
+	rw_tend_buoy=rw_tend - rw_tend_hadv - rw_tend_vadv - rw_tend_pgf
 
    CALL w_damp   ( rw_tend, max_vert_cfl,             &
                     max_horiz_cfl,                    &
