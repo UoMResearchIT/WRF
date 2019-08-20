@@ -41,7 +41,10 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                       n_moist,n_scalar,config_flags,rk_step,adv_moist_cond, &
                       ids, ide, jds, jde, kds, kde,                         &
                       ims, ime, jms, jme, kms, kme,                         &
-                      its, ite, jts, jte, kts, kte                          )
+                      its, ite, jts, jte, kts, kte,                         & 
+				      ru_tendf_pbl, rv_tendf_pbl,		                    & !D. Lowe
+				      ru_tendf_cu, rv_tendf_cu	                    	    ) !D. Lowe
+
 !-------------------------------------------------------------------
    IMPLICIT NONE
 !-------------------------------------------------------------------
@@ -59,7 +62,11 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                                                          ru_tendf, &
                                                          rv_tendf, &
                                                          rt_tendf, &
-                                                         rph_tendf
+                                                         rph_tendf, &
+                                                         ru_tendf_pbl, &
+                                                         rv_tendf_pbl, &
+                                                         ru_tendf_cu, &
+                                                         rv_tendf_cu
 
    REAL , DIMENSION(ims:ime , jms:jme),INTENT(INOUT) ::  mu_tendf
 
@@ -110,6 +117,14 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
    REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(IN  ) ::   & ! fire
                                                        rthfrten, &
                                                        rqvfrten   
+
+   REAL , DIMENSION(ims:ime , kms:kme, jms:jme)  ::   &
+                                                         ru_tendf_old, &
+                                                         rv_tendf_old, &
+                                                         ru_tendf_diff, &
+                                                         rv_tendf_diff
+                                                       
+   
 !------------------------------------------------------------------
 !  set up loop bounds for this grid's boundary conditions
 
@@ -120,6 +135,8 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                       ims, ime, jms, jme, kms, kme,            &
                       its, ite, jts, jte, kts, kte             )
 
+	ru_tendf_old = ru_tendf
+	rv_tendf_olf = rv_tendf
    if (config_flags%bl_pbl_physics .gt. 0)                     &
       CALL phy_bl_ten(config_flags,rk_step,n_moist,n_scalar,   &
                       rt_tendf,ru_tendf,rv_tendf,moist_tendf,  &
@@ -130,7 +147,14 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                       ids, ide, jds, jde, kds, kde,            &
                       ims, ime, jms, jme, kms, kme,            &
                       its, ite, jts, jte, kts, kte             )
+	ru_tendf_diff = ru_tendf - ru_tendf_old
+	rv_tendf_diff = rv_tendf - rv_tendf_old
+	ru_tendf_pbl = ru_tendf_pbl + ru_tendf_diff
+	rv_tendf_pbl = rv_tendf_pbl + rv_tendf_diff
+	
 
+	ru_tendf_old = ru_tendf
+	rv_tendf_olf = rv_tendf
    if (config_flags%cu_physics .gt. 0)                         &
       CALL phy_cu_ten(config_flags,rk_step,n_moist,n_scalar,   &
                       rt_tendf,ru_tendf,rv_tendf,              &
@@ -142,6 +166,10 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                       ids, ide, jds, jde, kds, kde,            &
                       ims, ime, jms, jme, kms, kme,            &
                       its, ite, jts, jte, kts, kte             )
+	ru_tendf_diff = ru_tendf - ru_tendf_old
+	rv_tendf_diff = rv_tendf - rv_tendf_old
+	ru_tendf_cu = ru_tendf_cu + ru_tendf_diff
+	rv_tendf_cu = rv_tendf_cu + rv_tendf_diff
 
    if (config_flags%shcu_physics .gt. 0)                       &
       CALL phy_shcu_ten(config_flags,rk_step,n_moist,n_scalar, &
