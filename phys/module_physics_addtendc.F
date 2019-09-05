@@ -149,8 +149,8 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                       its, ite, jts, jte, kts, kte             )
 	ru_tendf_diff = ru_tendf - ru_tendf_old
 	rv_tendf_diff = rv_tendf - rv_tendf_old
-	ru_tendf_pbl = ru_tendf_pbl + ru_tendf_diff
-	rv_tendf_pbl = rv_tendf_pbl + rv_tendf_diff
+	ru_tendf_pbl = ru_tendf_diff
+	rv_tendf_pbl = rv_tendf_diff
 	
 
 	ru_tendf_old = ru_tendf
@@ -168,8 +168,8 @@ SUBROUTINE update_phy_ten(rph_tendf,rt_tendf,ru_tendf,rv_tendf,moist_tendf, &
                       its, ite, jts, jte, kts, kte             )
 	ru_tendf_diff = ru_tendf - ru_tendf_old
 	rv_tendf_diff = rv_tendf - rv_tendf_old
-	ru_tendf_cu = ru_tendf_cu + ru_tendf_diff
-	rv_tendf_cu = rv_tendf_cu + rv_tendf_diff
+	ru_tendf_cu = ru_tendf_diff
+	rv_tendf_cu = rv_tendf_diff
 
    if (config_flags%shcu_physics .gt. 0)                       &
       CALL phy_shcu_ten(config_flags,rk_step,n_moist,n_scalar, &
