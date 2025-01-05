@@ -72,9 +72,9 @@ MODULE module_input_chem_data
 
     PARAMETER( kx=16, kxm1=kx-1, logg=350, lo=34) ! DL (6/2/2013) Changed value of logg from 200 to 350 for additional gas species
    
-    INTEGER, DIMENSION(logg)                     :: iref
+    INTEGER, DIMENSION(logg)                     :: iref = 7
 
-    REAL, DIMENSION(logg)                        :: fracref
+    REAL, DIMENSION(logg)                        :: fracref = 1.0
     REAL, DIMENSION(kx)                          :: dens
     REAL, DIMENSION(kx+1)                        :: zfa
     REAL, DIMENSION(kx+1)                        :: zfa_bdy
