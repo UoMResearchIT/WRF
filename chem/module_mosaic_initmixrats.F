@@ -1811,6 +1811,16 @@
 		qcoar = qcoar_vol/dumvol1p
 	    end if
 
+#if (CASENAME == 4)
+		! Doug Lowe - 20/5/2011 - set all aerosols to zero
+		!                         if we're using the boundary conditions
+		!                         from the mozbc script
+        qfine = 0.0
+        qcoar = 0.0
+#endif
+
+
+
 	    if ((qfine >= 0.0) .and. (qcoar >= 0.0)) then
 		qval = qfine*fr_fine(m) + qcoar*fr_coar(m)
 		chem_bv = qval*alt
